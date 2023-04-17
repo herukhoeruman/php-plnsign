@@ -1,0 +1,19 @@
+
+{
+    "status": "OK",
+    "ref_id": "98eb9027-2afc-4f4d-888f-853b37dec9b5",
+    "code": null,
+    "timestamp": "2023-04-13T15:37:12+07:00",
+    "message": null,
+    "data": {
+        "id": "98eb9027-66fa-439b-8763-8622405c99ca",
+        "stamp": [],
+        "sign": [
+            {
+                "teken_id": "HH283D00",
+                "email": "heru@gsp.co.id",
+                "url": "https://ttd.sandbox-111094.com/YVBhu8jxbvY3gYQh"
+            }
+        ]
+    }
+}
