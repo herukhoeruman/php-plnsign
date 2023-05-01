@@ -2,14 +2,20 @@
 
 
 
-$host = 'localhost';
-$username = 'root';
-$password = '';
-$dbname = 'plnr6871_callback';
+// $host = 'localhost';
+// $username = 'root';
+// $password = '';
+// $dbname = 'plnr6871_callback';
 
 // $username = "plnr6871_callback";
 // $password = "]0YFMu8]}IV,";
 // $dbname = "plnr6871_callback";
+
+$host = "mysql";
+$username = "myuser";
+$password = "password";
+$dbname = "signature";
+
 
 $conn = mysqli_connect($host, $username, $password, $dbname);
 if (!$conn) {
@@ -22,14 +28,29 @@ header('Content-Type: application/json');
 $curl = curl_init();
 
 
-$file           = $_FILES['document']['tmp_name'];
-$file_name      = $_FILES['document']['name'];
-$mime_type      = mime_content_type($file);
-$signature      = $_POST['signature'];
+$file           = isset($_FILES['document']['tmp_name']) ? $_FILES['document']['tmp_name'] : "";
+$file_name      = isset($_FILES['document']['name']) ? $_FILES['document']['name'] : "";
+$signature      = isset($_POST['signature']) ? $_POST['signature'] : "";
 $materai        = isset($_POST['ematerai']) ? $_POST['ematerai'] : '';
 $stempel        = isset($_POST['estamp']) ? $_POST['estamp'] : '';
 $is_in_order    = isset($_POST['is_in_order']) ? $_POST['is_in_order'] : '';
 
+if (empty($file) || empty($file_name)) {
+    $response = array(
+        'status'      => 'ERROR',
+        'message'    => 'document cannot be null',
+    );
+    echo json_encode($response);
+    exit;
+} else if (empty($signature)) {
+    $response = array(
+        'status'      => 'ERROR',
+        'message'    => 'signature cannot be null',
+    );
+    echo json_encode($response);
+    exit;
+}
+$mime_type      = mime_content_type($file);
 $cfile          = new CURLFile($file, $mime_type, $file_name);
 
 $data = array(
@@ -72,9 +93,33 @@ if (isset(getallheaders()['apikey'])) {
 
 
 
-$crn            = $_POST['crn'];
-$ceksum         = $_POST['ceksum'];
-$timestamp      = $_POST['timestamp'];
+$crn            = isset($_POST['crn']) ? $_POST['crn'] : "";
+$ceksum         = isset($_POST['ceksum']) ? $_POST['ceksum'] : "";
+$timestamp      = isset($_POST['timestamp']) ? $_POST['timestamp'] : "";
+
+if (empty($crn)) {
+    $response = array(
+        'status'      => 'ERROR',
+        'message'    => 'crn cannot be null',
+    );
+    echo json_encode($response);
+    exit;
+} else if (empty($ceksum)) {
+    $response = array(
+        'status'      => 'ERROR',
+        'message'    => 'ceksum cannot be null',
+    );
+    echo json_encode($response);
+    exit;
+} else if (empty($timestamp)) {
+    $response = array(
+        'status'      => 'ERROR',
+        'message'    => 'timestamp cannot be null',
+    );
+    echo json_encode($response);
+    exit;
+}
+
 $key            = "RAHASIA";
 $requestBody    = '{
         "document"      : "' . $file_name . '",
@@ -136,7 +181,7 @@ $trx_id = $genUUID;
 $id = $genUUID;
 
 /* ============ insert db ============ */
-$insertRequest = "INSERT INTO req_teken (
+$insertRequest = "INSERT INTO req_setposisi (
         kode,
         file_name, 
         file_path, 
@@ -167,7 +212,7 @@ $status = $json_response['status'];
 $code = $json_response['code'];
 
 if ($status == "ERROR") {
-    $insertResponse = "INSERT INTO res_teken (
+    $insertResponse = "INSERT INTO res_setposisi (
         kode,
         json,
         trx_id    
@@ -178,15 +223,17 @@ if ($status == "ERROR") {
     )";
 } else if ($status == "OK") {
     $document_id = $json_response['data']['id'];
-    $insertResponse = "INSERT INTO res_teken (
+    $insertResponse = "INSERT INTO res_setposisi (
         kode,
         json,
         document_id,
+        client_ref_num,
         trx_id    
     ) VALUES (
         '10',
         '$response',
         '$document_id',
+        '$crn',
         '$trx_id'
     )";
 }
@@ -196,7 +243,7 @@ if ($insertRequest && $insertResponse) {
     $message = array(
         'message' => 'New record was created successfully',
     );
-    echo json_encode($message);
+    // echo json_encode($message);
 } else {
     echo "Error: " . $sql . "<br>" . mysqli_error($conn);
 }
